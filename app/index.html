@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>INSTINCT by Hughes Technologies</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="top-shell" role="banner">
+      <div class="brand">
+        <div class="logo-bars" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div>
+          <h1>INSTINCT</h1>
+          <p>by Hughes Technologies</p>
+        </div>
+      </div>
+      <div class="transport" aria-label="Transport">
+        <button aria-label="Rewind">◀</button><button aria-label="Play">▶</button><button aria-label="Stop">■</button><button class="record" aria-label="Record">●</button>
+        <strong id="transport-time">01:02:18:07</strong>
+      </div>
+      <nav class="modes" aria-label="Main Views">
+        <button class="mode is-active" data-view="edit" aria-pressed="true">Edit</button>
+        <button class="mode" data-view="mixer" aria-pressed="false">Mixer</button>
+      </nav>
+    </header>
+
+    <main id="app-root">
+      <section id="edit-view" class="view is-active" aria-label="Edit Screen">
+        <aside class="track-panel panel">
+          <div class="panel-title-row">
+            <h2>Tracks</h2>
+            <button id="add-track-btn" class="ghost-btn" title="Add track">＋</button>
+          </div>
+          <ul id="track-list"></ul>
+        </aside>
+
+        <section class="timeline panel">
+          <h2>Timeline</h2>
+          <div id="ruler" class="ruler" aria-hidden="true"></div>
+          <div id="lanes" class="lanes"></div>
+        </section>
+
+        <aside class="inspector panel">
+          <h2>Inspector</h2>
+          <p id="inspector-track" class="inspector-track">No Track Selected</p>
+          <div class="control"><label for="gain">Gain</label><input id="gain" type="range" min="-18" max="18" value="0" /></div>
+          <div class="control"><label for="pan">Pan</label><input id="pan" type="range" min="-100" max="100" value="0" /></div>
+          <div class="control"><label>Automation</label><button class="pill">Read</button></div>
+        </aside>
+
+        <section class="plugin-rack panel">
+          <h2>Rack</h2>
+          <article class="plugin ai">
+            <h3>M|Ai-7</h3>
+            <p>Mixing with Michael</p>
+            <small>Session Diagnostics: Stable</small>
+          </article>
+          <article class="plugin"><h3>Architexure VCA-3A</h3></article>
+          <article class="plugin"><h3>Architexure BC-2</h3></article>
+        </section>
+
+        <section class="mini-mixer panel">
+          <h2>Integrated Mixer</h2>
+          <div id="mini-strips" class="strips"></div>
+        </section>
+      </section>
+
+      <section id="mixer-view" class="view" aria-label="Standalone Mixer Window">
+        <aside class="utility panel">
+          <h2>View</h2>
+          <button class="pill">Channels</button>
+          <button class="pill">Aux / FX</button>
+          <button class="pill">Meters</button>
+          <article class="michael-screen">
+            <h3>Mixing with Michael</h3>
+            <p>ONLINE</p>
+          </article>
+        </aside>
+        <section class="console panel">
+          <h2>Console</h2>
+          <div id="console-strips" class="console-strips"></div>
+        </section>
+        <aside class="master panel">
+          <h2>Master</h2>
+          <p>Architexure Bus Comp</p>
+          <p>MIAi-7 EQ</p>
+          <div id="master-meter" class="meter"></div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
