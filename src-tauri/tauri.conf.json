@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "INSTINCT",
+  "version": "0.1.0",
+  "identifier": "com.hughestechnologies.instinct",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../.next/static"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "INSTINCT — Hughes Technologies",
+        "width": 1680,
+        "height": 1050,
+        "minWidth": 1280,
+        "minHeight": 800,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/icon.ico",
+      "icons/icon.icns"
+    ],
+    "category": "Music",
+    "shortDescription": "Premium desktop DAW by Hughes Technologies",
+    "longDescription": "INSTINCT by Hughes Technologies — a flagship professional Digital Audio Workstation. Architexure plugins. Michael AI. Mixing with Michael."
+  }
+}
