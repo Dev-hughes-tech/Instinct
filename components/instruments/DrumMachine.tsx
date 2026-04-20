@@ -5,6 +5,18 @@ import { Fragment, useEffect } from "react";
 import { Play, Repeat, Sparkles, Trash2, Pause } from "lucide-react";
 import type { VirtualInstrument, InstrumentPad } from "@/lib/instruments";
 import { useInstruments } from "@/lib/instrumentsStore";
+import { useAudioStore } from "@/lib/audio/audioStore";
+import { AuditionChannel } from "@/components/audio/AuditionChannel";
+
+/** Map a pad's category tag onto the engine's timbre palette. */
+function padTimbre(pad: InstrumentPad): "kick" | "snare" | "hat" | "clap" | "perc" {
+  const label = pad.label.toLowerCase();
+  if (/(kick|bd|808)/.test(label)) return "kick";
+  if (/(snare|sd|rim)/.test(label)) return "snare";
+  if (/(hat|hh|cymbal|ride)/.test(label)) return "hat";
+  if (/(clap|snap)/.test(label)) return "clap";
+  return "perc";
+}
 
 /**
  * MPC-family drum machine UI. 4×4 pad grid on the left, step sequencer on
@@ -25,6 +37,19 @@ export function DrumMachine({ instrument }: { instrument: VirtualInstrument }) {
   const setSwing = useInstruments((s) => s.setSwing);
   const startStop = useInstruments((s) => s.startStop);
   const tick = useInstruments((s) => s.tick);
+  const audition = useAudioStore((s) => s.audition);
+
+  const firePad = (pad: InstrumentPad, velocity = 0.95) => {
+    hitPad(pad.id);
+    void audition(instrument.id, {
+      note: pad.note,
+      velocity,
+      duration: 0.15,
+      timbre: padTimbre(pad),
+      gain: pad.volume
+    });
+    setTimeout(() => clearHit(pad.id), 180);
+  };
 
   // Pattern tick — (60_000 / bpm) / 4 ms per 16th note
   useEffect(() => {
@@ -34,15 +59,15 @@ export function DrumMachine({ instrument }: { instrument: VirtualInstrument }) {
     return () => clearInterval(id);
   }, [pattern.running, pattern.bpm, tick]);
 
-  // Flash pads on playhead if their step is on.
+  // Flash pads on playhead if their step is on — AND fire the voice through
+  // the audio engine so the sequencer is actually audible.
   useEffect(() => {
     if (!pattern.running || !instrument.pads) return;
     instrument.pads.forEach((pad, padIdx) => {
       const cell = pattern.grid[padIdx]?.[pattern.playhead];
       if (cell?.on) {
-        hitPad(pad.id);
-        const t = setTimeout(() => clearHit(pad.id), 120);
-        return () => clearTimeout(t);
+        const velocity = cell.accent ? 1 : 0.75;
+        firePad(pad, velocity);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,6 +104,15 @@ export function DrumMachine({ instrument }: { instrument: VirtualInstrument }) {
         </span>
       </header>
 
+      <div className="pb-3">
+        <AuditionChannel
+          instrumentId={instrument.id}
+          noteSequence={(instrument.pads ?? []).slice(0, 4).map((p) => p.note)}
+          timbre="perc"
+          label="Audition Kit"
+        />
+      </div>
+
       <div className="flex flex-1 gap-3 overflow-hidden">
         {/* LEFT — 4×4 pad bank */}
         <section className="flex w-[360px] flex-none flex-col gap-2">
@@ -99,10 +133,7 @@ export function DrumMachine({ instrument }: { instrument: VirtualInstrument }) {
                           "--pad-accent-dark": instrument.chassis === "obsidian" ? "#222" : "#8F6F2D"
                         } as React.CSSProperties
                       }
-                      onMouseDown={() => {
-                        hitPad(pad.id);
-                        setTimeout(() => clearHit(pad.id), 180);
-                      }}
+                      onMouseDown={() => firePad(pad, 0.95)}
                       className="mpc-pad flex h-[70px] flex-col items-start justify-between rounded-md p-2 text-left"
                     >
                       <span className="text-[9px] uppercase tracking-[0.15em] opacity-70">

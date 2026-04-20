@@ -4,6 +4,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { Plus, Search } from "lucide-react";
 import { ARCHITEXURE_PLUGINS, type ArchitexureCategory } from "@/lib/architexurePlugins";
+import { usePluginWindows } from "@/lib/audio/pluginWindowStore";
 
 const CATEGORY_ORDER: ArchitexureCategory[] = [
   "dynamics", "eq", "reverb", "delay", "modulation", "harmonics", "saturation", "metering", "mic-modeling", "mastering", "utility", "ai"
@@ -20,6 +21,14 @@ export function ArchitexureBrowser({
 }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<ArchitexureCategory | "all">("all");
+  const openWindow = usePluginWindows((s) => s.open);
+
+  const handlePick = (pluginId: string) => {
+    // Open the floating plug-in window (real WebAudio instance) AND notify the
+    // parent so the rack insert list can record it.
+    openWindow(pluginId);
+    onPick(pluginId);
+  };
 
   const filtered = ARCHITEXURE_PLUGINS.filter((p) => {
     if (cat !== "all" && p.category !== cat) return false;
@@ -64,7 +73,7 @@ export function ArchitexureBrowser({
         {filtered.map((p) => (
           <li key={p.id}>
             <button
-              onClick={() => onPick(p.id)}
+              onClick={() => handlePick(p.id)}
               className="group flex w-full items-center gap-2 border-b border-surface-100 px-3 py-2 text-left hover:bg-surface-50"
             >
               <div

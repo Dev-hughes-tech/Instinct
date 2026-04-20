@@ -7,6 +7,24 @@ import type { VirtualInstrument } from "@/lib/instruments";
 import { DrumMachine } from "./DrumMachine";
 import { KeyboardStrip } from "./KeyboardStrip";
 import { useInstruments } from "@/lib/instrumentsStore";
+import { AuditionChannel } from "@/components/audio/AuditionChannel";
+import type { VoiceOptions } from "@/lib/audio/engine";
+
+function timbreFor(instrument: VirtualInstrument): VoiceOptions["timbre"] {
+  switch (instrument.category) {
+    case "bass": return "bass";
+    case "keys": return "keys";
+    case "synth": return "lead";
+    case "pad":
+    case "texture": return "pad";
+    case "strings":
+    case "orchestra":
+    case "choir": return "strings";
+    case "brass": return "brass";
+    case "fx": return "fx";
+    default: return "keys";
+  }
+}
 
 /**
  * Renders the appropriate UI surface for the currently selected instrument.
@@ -63,6 +81,20 @@ function MacroPanel({
 
       <div className="grid flex-1 grid-cols-[1fr_260px] overflow-hidden">
         <section className="flex flex-col overflow-hidden p-4">
+          {/* Audition channel — plays a real voice on demand. */}
+          <div className="mb-3">
+            <AuditionChannel
+              instrumentId={instrument.id}
+              noteSequence={
+                instrument.range
+                  ? [instrument.range.low + 24, instrument.range.low + 28, instrument.range.low + 31, instrument.range.low + 36]
+                  : [60, 64, 67, 72]
+              }
+              timbre={timbreFor(instrument)}
+              label={`Audition ${instrument.name}`}
+            />
+          </div>
+
           {/* macros */}
           <div className="panel-surface flex gap-4 rounded-xl p-4">
             {instrument.macros.map((m) => {

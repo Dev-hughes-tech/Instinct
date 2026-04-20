@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useEffect } from "react";
 import {
   Circle,
   Clock,
@@ -15,17 +16,38 @@ import {
   Undo2
 } from "lucide-react";
 import { useInstinct } from "@/lib/store";
+import { useAudioStore } from "@/lib/audio/audioStore";
 import { formatBeats } from "@/lib/format";
 import { MeterDot } from "@/components/controls/MeterDot";
 
 export function TransportBar() {
   const transport = useInstinct((s) => s.session.transport);
   const inspector = useInstinct((s) => s.session.inspector);
-  const togglePlay = useInstinct((s) => s.togglePlay);
+  const togglePlayUi = useInstinct((s) => s.togglePlay);
   const toggleRecord = useInstinct((s) => s.toggleRecord);
   const toggleLoop = useInstinct((s) => s.toggleLoop);
-  const toggleMetronome = useInstinct((s) => s.toggleMetronome);
+  const toggleMetronomeUi = useInstinct((s) => s.toggleMetronome);
   const toggleSnap = useInstinct((s) => s.toggleSnap);
+
+  const enginePlay = useAudioStore((s) => s.play);
+  const engineStop = useAudioStore((s) => s.stop);
+  const setTempo = useAudioStore((s) => s.setTempo);
+  const setMetronome = useAudioStore((s) => s.setMetronome);
+  const masterPeak = useAudioStore((s) => s.masterLevel.peak);
+
+  // Keep the engine tempo mirrored to the UI transport.
+  useEffect(() => { setTempo(transport.tempoBpm); }, [transport.tempoBpm, setTempo]);
+
+  const togglePlay = () => {
+    togglePlayUi();
+    if (transport.playing) void engineStop();
+    else void enginePlay();
+  };
+
+  const toggleMetronome = () => {
+    toggleMetronomeUi();
+    setMetronome(!transport.metronome);
+  };
 
   return (
     <div className="panel-surface mx-auto flex h-[56px] w-[760px] max-w-full items-center gap-3 rounded-2xl px-4">
@@ -42,6 +64,10 @@ export function TransportBar() {
         <TransportBtn
           icon={<Square className="h-3.5 w-3.5 fill-current" />}
           label="Stop"
+          onClick={() => {
+            if (transport.playing) togglePlay();
+            else void engineStop();
+          }}
         />
         <TransportBtn
           active={transport.playing}
@@ -111,7 +137,7 @@ export function TransportBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-1">
-        <MeterDot level={transport.playing ? 0.8 : 0.2} size={7} />
+        <MeterDot level={transport.playing ? Math.max(0.15, masterPeak) : 0.1} size={7} />
         <span className="label-tiny">{transport.playing ? "ROLLING" : "STOPPED"}</span>
       </div>
     </div>

@@ -14,6 +14,15 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+anyhow = "1"
+cpal = "0.15"
+
+# CoreAudio HAL + AudioUnit hosting. Only pulled in on macOS; other platforms
+# fall back to the cpal host provided by their OS (WASAPI on Windows, ALSA on
+# Linux). This mirrors the AudioBackend surface exposed to the UI.
+[target.'cfg(target_os = "macos")'.dependencies]
+coreaudio-rs = "0.11"
+core-foundation = "0.9"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
